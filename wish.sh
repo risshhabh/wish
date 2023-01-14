@@ -33,7 +33,7 @@ case $1 in
         norm=$(tput sgr0)
         echo "${bold}COMPILE${norm}: g++ -std=c++17 -pedantic-errors -Wall -Wextra -Weffc++ -Wsign-conversion -Werror -fmax-errors=1 \$LIBRARY \$INCLUDE -o \$EXEC_FILE \$SRC_FILE"
         echo "Where \$LIBRARY=\"-L/usr/local/global_libs/boost_1_81_0/stage/lib\""
-        echo "and \$INCLUDE=\"-I/usr/local/global_libs/boost_1_81_0\""
+        echo "  and \$INCLUDE=\"-I/usr/local/global_libs/boost_1_81_0\""
         exit 0;;
 esac
 
@@ -143,7 +143,6 @@ rip_save()
         echo "error: Expected executable, got $1"
         exit 1
     else
-    then
         rip_file=$(realpath -q "$1")
     fi
 }
