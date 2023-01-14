@@ -24,7 +24,7 @@ case $1 in
         echo "       ${bold}nivekuil/rip${norm} @ https://gihub.com/nivekuil/rip"
         echo "              Uses \`rip\` to delete files,"
         echo "              Can use builtin \`rm\` by editing code"
-        echo "       ${bold}wish.py${norm} @ $(realpath -q wish.py)"
+        echo "       ${bold}wish.py${norm} @ $(realpath -q $(dirname $0)'/wish.py')"
         echo "              Uses Python to do some basic path manipulation"
         echo "              Make sure \`wish.py\` is located in the same folder as \`wish.sh\`."
         exit 0;;
