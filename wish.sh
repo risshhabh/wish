@@ -6,6 +6,8 @@ exe_dir=$(realpath ./target)  # Default executable path -- set with `-o` flag
 src_dir=$(realpath ./src)     # Default code path
                               # TODO cannot be set with a flag
 
+start_pwd=`pwd -P`
+
 case $1 in
     dependent|dependencies)
         bold=$(tput bold)
@@ -22,13 +24,16 @@ case $1 in
         echo "       ${bold}nivekuil/rip${norm} @ https://gihub.com/nivekuil/rip"
         echo "              Uses \`rip\` to delete files,"
         echo "              Can use builtin \`rm\` by editing code"
+        echo "       ${bold}wish.py${norm} @ $(realpath wish.py)"
+        echo "              Uses Python to do some basic path manipulation"
+        echo "              Make sure \`wish.py\` is located in the same folder as \`wish.sh\`."
         exit 0;;
     commands|command|cmds|cmd)
         bold=$(tput bold)
         norm=$(tput sgr0)
         echo "${bold}COMPILE${norm}: g++ -std=c++17 -pedantic-errors -Wall -Wextra -Weffc++ -Wsign-conversion -Werror -fmax-errors=1 \$LIBRARY \$INCLUDE -o \$EXEC_FILE \$SRC_FILE"
         echo "Where \$LIBRARY=\"-L/usr/local/global_libs/boost_1_81_0/stage/lib\""
-        echo "and \$INCUDE=\"-I/usr/local/global_libs/boost_1_81_0\""
+        echo "and \$INCLUDE=\"-I/usr/local/global_libs/boost_1_81_0\""
         exit 0;;
 esac
 
@@ -52,8 +57,8 @@ print_help_page()
     echo "              Return error if given argument is not an executable file\n"
     echo "       ${bold}-D, --delete-all${norm}"
     echo "              Delete all executables in \$exe_dir via nivekuil/rip\n"
-    echo "     ${bold}-h${norm}      Display help page\n"
-    echo "     ${bold}-o${norm}      Location of output executable directory to C++ file,"
+    echo "       ${bold}-h${norm}      Display help page\n"
+    echo "       ${bold}-o${norm}      Location of output executable directory to C++ file,"
     echo "             Default is \`../target/\`\n"
 }
 
@@ -68,14 +73,14 @@ fi
 # ? -a|--all)
 fd_ext_search()
 {
-    cd ./src  # Only search in `src/` folder
+    cd $src_dir # Only search in $src_dir folder
 
     old_IFS=$IFS
     IFS=$'\n'  # Splits only by newlines, not spaces nor tabs
     cpp_files=($( fd -HIag -e cpp -e cxx -e cc ))  # sharkdp/fd
-               # Makes array of all C++ files in `src/`
+               # Makes array of all C++ files in $src_dir
     IFS=$old_IFS  # Reverts splits
-    cd ..  # Go back out of src/ to ..
+    cd $start_pwd  # Go back out of $src_dir
 
     # BASH alternative that doesn't work in ZSH :'(
     # mapfile -t cpp_files < <( fd -HIag -e cpp -e cxx -e cc)
@@ -83,14 +88,14 @@ fd_ext_search()
 # ?? If sharkdp/fd is not installed, match case for extensions
 for_file_search()
 {
-    cd src
+    cd $src_dir
     for file in *
     do
         case "$file" in
             *.[Cc][Pp][Pp]|*.[Cc][Xx][Xx]|*.[Cc][Cc]) cpp_files+=($(realpath $file));;  # RegEx for case insensitivity
         esac
     done
-    cd ..
+    cd $start_pwd
 }
 
 
@@ -200,5 +205,39 @@ then
     fi
 elif [[ $rip_file ]]  # Else if there is $rip_file that is not `true`,
 then                  # Delete that $rip_file
-    rip "$rip_file"
+    rip "${rip_file}"
+fi
+
+
+# Finish compile commands
+
+## METHOD
+# Goal is to go from $src_dir/path/to/file.cpp -> $exe_dir/path/to/file
+#
+# 1. goto $src_dir
+# 2. get relpath of file.cpp; ./path/to/file.cpp
+# 3. goto $exe_dir
+# 4. mkdir -p ./path/to
+# 5. compile_command $src_dir/path/to/file.cpp -o ./path/to/file
+## METHOD
+
+#! Return error when C++ file not in $src_dir (should not happen)
+if [[ $cpp_files ]]  # If $cpp_files is not empty
+then
+
+    LIBRARY="-L/usr/local/global_libs/boost_1_81_0/stage/lib"
+    INCLUDE="-I/usr/local/global_libs/boost_1_81_0"
+
+    for cpp_file in "${cpp_files[@]}"
+    do
+        relfile=$(python3 wish.py "1" $cpp_file $src_dir)  # 1,2
+
+        cd $exe_dir # 3
+        mkdir -p $(realpath $(dirname $relfile)) # 4
+
+        cd $(realpath $(dirname $relfile))  # cd into folder where executable will be made
+
+        exe_file=$(python3 wish.py "2" $cpp_file)
+        g++ -std=c++17 -pedantic-errors -Wall -Wextra -Weffc++ -Wsign-conversion -Werror -fmax-errors=1 $LIBRARY $INCLUDE -o $exe_file $cpp_file
+    done
 fi
