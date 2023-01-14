@@ -2,8 +2,8 @@
 
 #* Variables *#
 # !! `realpath` Requires homebrew `coreutils` package
-exe_dir=$(realpath ./target)  # Default executable path -- set with `-o` flag
-src_dir=$(realpath ./src)     # Default code path
+exe_dir=$(realpath -q ./target)  # Default executable path -- set with `-o` flag
+src_dir=$(realpath -q ./src)     # Default code path
                               # TODO cannot be set with a flag
 
 start_pwd=`pwd -P`
@@ -24,7 +24,7 @@ case $1 in
         echo "       ${bold}nivekuil/rip${norm} @ https://gihub.com/nivekuil/rip"
         echo "              Uses \`rip\` to delete files,"
         echo "              Can use builtin \`rm\` by editing code"
-        echo "       ${bold}wish.py${norm} @ $(realpath wish.py)"
+        echo "       ${bold}wish.py${norm} @ $(realpath -q wish.py)"
         echo "              Uses Python to do some basic path manipulation"
         echo "              Make sure \`wish.py\` is located in the same folder as \`wish.sh\`."
         exit 0;;
@@ -92,7 +92,7 @@ for_file_search()
     for file in *
     do
         case "$file" in
-            *.[Cc][Pp][Pp]|*.[Cc][Xx][Xx]|*.[Cc][Cc]) cpp_files+=($(realpath $file));;  # RegEx for case insensitivity
+            *.[Cc][Pp][Pp]|*.[Cc][Xx][Xx]|*.[Cc][Cc]) cpp_files+=($(realpath -q $file));;  # RegEx for case insensitivity
         esac
     done
     cd $start_pwd
@@ -122,7 +122,7 @@ check_comp_exists() {
     fd_ext_search  # Get all C++ files in $src_dir
     if [["${cpp_files[@]}" =~ "$1" ]]
     then
-        cpp_files=($(realpath "$1"))
+        cpp_files=($(realpath -q "$1"))
     fi
 }
 
@@ -144,7 +144,7 @@ rip_save()
         exit 1
     else
     then
-        rip_file=$(realpath "$1")
+        rip_file=$(realpath -q "$1")
     fi
 }
 
@@ -161,7 +161,7 @@ set_exe_out_dir()
         echo "error: Cannot set output executable directory: no such directory"
         exit 1
     fi
-    exec_file=$(realpath "$1")
+    exec_file=$(realpath -q "$1")
 }
 
 
@@ -234,9 +234,9 @@ then
         relfile=$(python3 $pypath "1" $cpp_file $src_dir)  # 1,2
 
         cd $exe_dir # 3
-        mkdir -p $(realpath $(dirname $relfile)) # 4
+        mkdir -p $(realpath -q $(dirname $relfile)) # 4
 
-        cd $(realpath $(dirname $relfile))  # cd into folder where executable will be made
+        cd $(realpath -q $(dirname $relfile))  # cd into folder where executable will be made
 
         g++ -std=c++17 -pedantic-errors -Wall -Wextra -Weffc++ -Wsign-conversion -Werror -fmax-errors=1 $LIBRARY $INCLUDE -o $(python3 $pypath "2" $cpp_file) $cpp_file  # 5
 
