@@ -227,6 +227,7 @@ then
 
     LIBRARY="-L/usr/local/global_libs/boost_1_81_0/stage/lib"
     INCLUDE="-I/usr/local/global_libs/boost_1_81_0"
+    pypath="PATH TO THE wish.py PYTHON FILE"
 
     for cpp_file in "${cpp_files[@]}"
     do
@@ -238,6 +239,8 @@ then
         cd $(realpath $(dirname $relfile))  # cd into folder where executable will be made
 
         exe_file=$(python3 wish.py "2" $cpp_file)
-        g++ -std=c++17 -pedantic-errors -Wall -Wextra -Weffc++ -Wsign-conversion -Werror -fmax-errors=1 $LIBRARY $INCLUDE -o $exe_file $cpp_file
+        g++ -std=c++17 -pedantic-errors -Wall -Wextra -Weffc++ -Wsign-conversion -Werror -fmax-errors=1 $LIBRARY $INCLUDE -o $exe_file $cpp_file  # 5
+
+        cd $start_pwd
     done
 fi
