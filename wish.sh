@@ -57,9 +57,11 @@ print_help_page()
     echo "              Return error if given argument is not an executable file\n"
     echo "       ${bold}-D, --delete-all${norm}"
     echo "              Delete all executables in \$exe_dir via nivekuil/rip\n"
-    echo "       ${bold}-h${norm}      Display help page\n"
-    echo "       ${bold}-o${norm}      Location of output executable directory to C++ file,"
-    echo "             Default is \`../target/\`\n"
+    echo "       ${bold}-h, --help, help${norm}"
+    echo "              Display help page\n"
+    echo "       ${bold}-o, --output${norm}"
+    echo "              Location of output executable directory realtive to C++ file,"
+    echo "              Default is \`../target/\`\n"
 }
 
 if [[ ! "$1" ]] # 0 args given
@@ -120,7 +122,7 @@ check_comp_exists() {
 
     # Test if $1 is inside $src_dir
     fd_ext_search  # Get all C++ files in $src_dir
-    if [["${cpp_files[@]}" =~ "$1" ]]
+    if [[ "${cpp_files[@]}" =~ "$1" ]]
     then
         cpp_files=($(realpath -q "$1"))
     fi
@@ -160,11 +162,13 @@ set_exe_out_dir()
         echo "error: Cannot set output executable directory: no such directory"
         exit 1
     fi
-    exec_file=$(realpath -q "$1")
+    exe_dir=$(realpath -q "$1")
 }
 
 
 # https://rowannicholls.github.io/bash/intro/passing_arguments.html
+while [[ "$#" -gt 0 ]]
+do
 case $1 in
     -a|--all|--compile-all)
         fd_ext_search  #-> cpp_files: arr[str: abspath]
@@ -182,6 +186,7 @@ case $1 in
         print_help_page
         exit 0;;
     -o|--output)
+        echo "In -o flag"
         set_exe_out_dir "$2"
         shift;;
     *)
@@ -192,15 +197,15 @@ shift
 done
 
 # Finish delete commands
-if [ rip_file = true ]
+if [ "$rip_file" = true ]
 then
     read -p "Really delete all executables? (y/N) " confirm
     confirm_code=("Y" "y")
 
     if [[ "${confirm_code[@]}" =~ "$confirm" ]]
     then
-        rip exe_dir
-        mkdir -p exe_dir
+        rip $exe_dir
+        mkdir -p $exe_dir
     fi
 elif [[ $rip_file ]]  # Else if there is $rip_file that is not `true`,
 then                  # Delete that $rip_file
@@ -233,11 +238,12 @@ then
         relfile=$(python3 $pypath "1" $cpp_file $src_dir)  # 1,2
 
         cd $exe_dir # 3
-        mkdir -p $(realpath -q $(dirname $relfile)) # 4
+
+        mkdir -p $(dirname $relfile) # 4
 
         cd $(realpath -q $(dirname $relfile))  # cd into folder where executable will be made
 
-        g++ -std=c++17 -pedantic-errors -Wall -Wextra -Weffc++ -Wsign-conversion -Werror -fmax-errors=1 $LIBRARY $INCLUDE -o $(python3 $pypath "2" $cpp_file) $cpp_file  # 5
+        g++ -std=c++17 -pedantic-errors -Wall -Wextra -Weffc++ -Wsign-conversion $LIBRARY $INCLUDE -o $(python3 $pypath "2" $cpp_file) $cpp_file  # 5
 
         cd $start_pwd
     done
