@@ -6,6 +6,13 @@ exe_dir=$(realpath -q ./target)  # Default executable path -- set with `-o` flag
 src_dir=$(realpath -q ./src)     # Default code path
                               # TODO cannot be set with a flag
 
+
+if [[ ! -d ./src ]]
+then
+    echo "Fatal: No \$exe_dir in \$PWD; exit with error 1"
+    exit 1
+fi
+
 start_pwd=`pwd -P`
 
 case $1 in
@@ -31,7 +38,7 @@ case $1 in
     commands|command|cmds|cmd)
         bold=$(tput bold)
         norm=$(tput sgr0)
-        echo "${bold}COMPILE${norm}: g++ -std=c++17 -pedantic-errors -Wall -Wextra -Weffc++ -Wsign-conversion \$LIBRARY \$INCLUDE -o \$EXEC_FILE \$SRC_FILE"
+        echo "${bold}COMPILE${norm}: /usr/bin/g++ -fdiagnostics-color=always -std=c++17 -pedantic-errors -Wall -Wextra -Weffc++ -Wsign-conversion \$LIBRARY \$INCLUDE -o \$EXEC_FILE -g \$SRC_FILE"
         echo "Where \$LIBRARY=\"-L/usr/local/global_libs/boost_1_81_0/stage/lib\""
         echo "  and \$INCLUDE=\"-I/usr/local/global_libs/boost_1_81_0\""
         exit 0;;
@@ -59,7 +66,7 @@ print_help_page()
     echo "              Delete all executables in \$exe_dir via nivekuil/rip\n"
     echo "       ${bold}-h, --help, help${norm}"
     echo "              Display help page\n"
-    echo "       ${bold}-o, --output${norm}"
+    echo "       ${bold}-o, --output${norm} !! DO NOT USE"
     echo "              Location of output executable directory realtive to C++ file,"
     echo "              Default is \`../target/\`\n"
     echo ""
@@ -189,10 +196,10 @@ case $1 in
     -h|--help|help)
         print_help_page
         exit 0;;
-    -o|--output)
-        echo "In -o flag"
-        set_exe_out_dir "$2"
-        shift;;
+    # -o|--output)
+    #     echo "In -o flag"
+    #     set_exe_out_dir "$2"
+    #     shift;;
     *)
         echo "error: Unknown parameter passed: $1"
         exit 1;;
@@ -247,7 +254,7 @@ then
 
         cd $(realpath -q $(dirname $relfile))  # cd into folder where executable will be made
 
-        g++ -std=c++17 -pedantic-errors -Wall -Wextra -Weffc++ -Wsign-conversion $LIBRARY $INCLUDE -o $(python3 $pypath "2" $cpp_file) $cpp_file  # 5
+        /usr/bin/g++ -fdiagnostics-color=always -std=c++17 -pedantic-errors -Wall -Wextra -Weffc++ -Wsign-conversion $LIBRARY $INCLUDE -o $(python3 $pypath "2" $cpp_file) $cpp_file  # 5
 
         cd $start_pwd
     done
