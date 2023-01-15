@@ -62,6 +62,7 @@ print_help_page()
     echo "       ${bold}-o, --output${norm}"
     echo "              Location of output executable directory realtive to C++ file,"
     echo "              Default is \`../target/\`\n"
+    echo "\n\nAs of the current version, the ${bold}-o${norm} flag must be placed before all other flags"
 }
 
 if [[ ! "$1" ]] # 0 args given
