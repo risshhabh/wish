@@ -31,7 +31,7 @@ case $1 in
     commands|command|cmds|cmd)
         bold=$(tput bold)
         norm=$(tput sgr0)
-        echo "${bold}COMPILE${norm}: g++ -std=c++17 -pedantic-errors -Wall -Wextra -Weffc++ -Wsign-conversion -Werror -fmax-errors=1 \$LIBRARY \$INCLUDE -o \$EXEC_FILE \$SRC_FILE"
+        echo "${bold}COMPILE${norm}: g++ -std=c++17 -pedantic-errors -Wall -Wextra -Weffc++ -Wsign-conversion \$LIBRARY \$INCLUDE -o \$EXEC_FILE \$SRC_FILE"
         echo "Where \$LIBRARY=\"-L/usr/local/global_libs/boost_1_81_0/stage/lib\""
         echo "  and \$INCLUDE=\"-I/usr/local/global_libs/boost_1_81_0\""
         exit 0;;
@@ -62,6 +62,7 @@ print_help_page()
     echo "       ${bold}-o, --output${norm}"
     echo "              Location of output executable directory realtive to C++ file,"
     echo "              Default is \`../target/\`\n"
+    echo ""
     echo "\nAs of the current version, the ${bold}-o${norm} flag must be placed before all other flags"
 }
 
