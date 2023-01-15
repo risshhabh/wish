@@ -23,7 +23,7 @@ case $1 in
         echo "              \`check_comp_exists\` still requires \`fd\`\n"
         echo "       ${bold}nivekuil/rip${norm} @ https://gihub.com/nivekuil/rip"
         echo "              Uses \`rip\` to delete files,"
-        echo "              Can use builtin \`rm\` by editing code"
+        echo "              Can use builtin \`rm\` by editing code\n"
         echo "       ${bold}wish.py${norm} @ $(realpath -q $(dirname $0)'/wish.py')"
         echo "              Uses Python to do some basic path manipulation"
         echo "              Make sure \`wish.py\` is located in the same folder as \`wish.sh\`."
@@ -64,6 +64,8 @@ print_help_page()
     echo "              Default is \`../target/\`\n"
     echo ""
     echo "\nAs of the current version, the ${bold}-o${norm} flag must be placed before all other flags"
+    echo "\`wish dependencies\` : see wish's dependencies"
+    echo "\`wish command\`      : see compile command"
 }
 
 if [[ ! "$1" ]] # 0 args given
