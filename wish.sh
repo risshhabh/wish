@@ -1,10 +1,12 @@
 #!/bin/sh
 
+#** Wish C++ **#
+
 #* Variables *#
 # !! `realpath` Requires homebrew `coreutils` package
 exe_dir=$(realpath -q ./target)  # Default executable path -- set with `-o` flag
 src_dir=$(realpath -q ./src)     # Default code path
-                              # TODO cannot be set with a flag
+                                 # TODO cannot be set with a flag
 
 
 if [[ ! -d ./src ]]
@@ -240,8 +242,8 @@ fi
 if [[ $cpp_files ]]  # If $cpp_files is not empty
 then
 
-    LIBRARY="-L/usr/local/global_libs/boost_1_81_0/stage/lib"
-    INCLUDE="-I/usr/local/global_libs/boost_1_81_0"
+    # LIBRARY="-L/usr/local/global_libs/boost_1_81_0/stage/lib"
+    # INCLUDE="-I/usr/local/global_libs/boost_1_81_0"
     pypath="$(dirname $0)/wish.py"
 
     for cpp_file in "${cpp_files[@]}"
@@ -254,7 +256,7 @@ then
 
         cd $(realpath -q $(dirname $relfile))  # cd into folder where executable will be made
 
-        /usr/bin/g++ -fdiagnostics-color=always -std=c++17 -pedantic-errors -Wall -Wextra -Weffc++ -Wsign-conversion $LIBRARY $INCLUDE -o $(python3 $pypath "2" $cpp_file) $cpp_file  # 5
+        /usr/bin/g++ -fdiagnostics-color=always -std=c++17 -pedantic-errors -Wall -Wextra -Weffc++ -Wsign-conversion -o $(python3 $pypath "2" $cpp_file) $cpp_file  # 5
 
         cd $start_pwd
     done
