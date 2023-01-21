@@ -92,13 +92,13 @@ fd_ext_search()
 
     old_IFS=$IFS
     IFS=$'\n'  # Splits only by newlines, not spaces nor tabs
-    cpp_files=($( fd -HIag -e cpp -e cxx -e cc ))  # sharkdp/fd
+    c_files=($( fd -HIag -e c))  # sharkdp/fd
                # Makes array of all C files in $src_dir
     IFS=$old_IFS  # Reverts splits
     cd $start_pwd  # Go back out of $src_dir
 
     # BASH alternative that doesn't work in ZSH :'(
-    # mapfile -t cpp_files < <( fd -HIag -e cpp -e cxx -e cc)
+    # mapfile -t c_files < <( fd -HIag -e c)
 }
 # ?? If sharkdp/fd is not installed, match case for extensions
 for_file_search()
@@ -107,7 +107,7 @@ for_file_search()
     for file in *
     do
         case "$file" in
-            *.[Cc][Pp][Pp]|*.[Cc][Xx][Xx]|*.[Cc][Cc]) cpp_files+=($(realpath -q $file));;  # RegEx for case insensitivity
+            *.[Cc]) c_files+=($(realpath -q $file));;  # RegEx for case insensitivity
         esac
     done
     cd $start_pwd
@@ -127,7 +127,8 @@ check_comp_exists() {
     fi
 
     case "$1" in  # First make sure it is C file
-        *.[Cc][Pp][Pp]|*.[Cc][Xx][Xx]|*.[Cc][Cc]) true;;  # RegEx for case insensitivity
+        # *.[Cc][Pp][Pp]|*.[Cc][Xx][Xx]|*.[Cc][Cc]) true;;  # RegEx for case insensitivity -- C++
+        *.[Cc]) true;;  # RegEx for case insensitivity -- C
         *)
             echo "error: Expected C file, got: $1"
             exit 1;;
@@ -135,9 +136,9 @@ check_comp_exists() {
 
     # Test if $1 is inside $src_dir
     fd_ext_search  # Get all C files in $src_dir
-    if [[ "${cpp_files[@]}" =~ "$1" ]]
+    if [[ "${c_files[@]}" =~ "$1" ]]
     then
-        cpp_files=($(realpath -q "$1"))
+        c_files=($(realpath -q "$1"))
     fi
 }
 
@@ -184,10 +185,10 @@ while [[ "$#" -gt 0 ]]
 do
 case $1 in
     -a|--all|--compile-all)
-        fd_ext_search  #-> cpp_files: arr[str: abspath]
+        fd_ext_search  #-> c_files: arr[str: abspath]
         shift;;
     -c|--compile)
-        check_comp_exists "$2"  #-> cpp_files -> arr[str: abspath], len == 1
+        check_comp_exists "$2"  #-> c_files -> arr[str: abspath], len == 1
         shift;;  # $2 -> $1
     -d|--delete)
         rip_save "$2" #-> rip_file -> str: abspath
@@ -229,26 +230,26 @@ fi
 # Finish compile commands
 
 ## METHOD
-# Goal is to go from $src_dir/path/to/file.cpp -> $exe_dir/path/to/file
+# Goal is to go from $src_dir/path/to/file.c -> $exe_dir/path/to/file
 #
 # 1. goto $src_dir
-# 2. get relpath of file.cpp; ./path/to/file.cpp
+# 2. get relpath of file.c; ./path/to/file.c
 # 3. goto $exe_dir
 # 4. mkdir -p ./path/to
-# 5. compile_command $src_dir/path/to/file.cpp -o ./path/to/file
+# 5. compile_command $src_dir/path/to/file.c -o ./path/to/file
 ## METHOD
 
 #! Return error when C file not in $src_dir (should not happen)
-if [[ $cpp_files ]]  # If $cpp_files is not empty
+if [[ $c_files ]]  # If $c_files is not empty
 then
 
     # LIBRARY="-L/usr/local/global_libs/boost_1_81_0/stage/lib"
     # INCLUDE="-I/usr/local/global_libs/boost_1_81_0"
     pypath="$(dirname $0)/wish.py"
 
-    for cpp_file in "${cpp_files[@]}"
+    for c_file in "${c_files[@]}"
     do
-        relfile=$(python3 $pypath "1" $cpp_file $src_dir)  # 1,2
+        relfile=$(python3 $pypath "1" $c_file $src_dir)  # 1,2
 
         cd $exe_dir # 3
 
@@ -256,7 +257,7 @@ then
 
         cd $(realpath -q $(dirname $relfile))  # cd into folder where executable will be made
 
-        /usr/bin/gcc -fdiagnostics-color=always -std=c17 -pedantic-errors -Wall -Wextra -Weffc -Wsign-conversion -o $(python3 $pypath "2" $cpp_file) $cpp_file  # 5
+        /usr/bin/gcc -fdiagnostics-color=always -std=c17 -pedantic-errors -Wall -Wextra -Wsign-conversion -o $(python3 $pypath "2" $c_file) $c_file  # 5
 
         cd $start_pwd
     done
