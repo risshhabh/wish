@@ -1,5 +1,4 @@
 # wish compile
 
 Preconfigured compile command for C and C++.<br>
-Some inbuilt docs (ex: `w(is)h command` are outdated due to my laziness.<br><br>
-Do not recommend using this unless you understand the code to some extent
+Created for personal use, run `wish --help` to get a list of all of the commands.
